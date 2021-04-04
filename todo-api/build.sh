@@ -16,4 +16,6 @@ rm build/*.sh &>/dev/null
 chmod -R a+rwX build
 
 # Build podman image
-sudo podman build -t do180/todo-api -f Dockerfile.todo-api # --build-arg NEXUS_BASE_URL=${NEXUS_BASE_URL}
+sudo podman build  \
+  -t todo-backend  \
+  -f Dockerfile.todo-backend # --build-arg NEXUS_BASE_URL=${NEXUS_BASE_URL}
