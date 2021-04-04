@@ -1,0 +1,13 @@
+FROM registry.access.redhat.com/rhscl/httpd-24-rhel7:latest
+
+MAINTAINER Vicente J. Jimenez Miras <vjjmiras@redhat.com>
+
+COPY build /tmp/src
+
+ADD  container-entrypoint /usr/bin/container-entrypoint
+
+RUN  chmod a+x /usr/bin/container-entrypoint \
+     && /usr/libexec/s2i/assemble
+
+CMD ["/usr/libexec/s2i/run"]
+

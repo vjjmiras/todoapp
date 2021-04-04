@@ -1,0 +1,9 @@
+#!/bin/bash
+
+SRC_FILE='/opt/app-root/src/script/item.js'
+
+sed -i -e 's,TODO_API_SERVICE_HOST,'${TODO_API_SERVICE_HOST}',' \
+       -e 's,TODO_API_SERVICE_PORT,'${TODO_API_SERVICE_PORT}',' \
+       ${SRC_FILE}
+
+exec "$@"
