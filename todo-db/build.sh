@@ -1,3 +1,7 @@
 #!/bin/bash
 
-sudo podman build -t do180/todo-db:latest -f Dockerfile.todo-db .
+sudo podman build             \
+  -t todo-database:latest     \
+  -f Dockerfile.todo-database \
+  --layers=false
+

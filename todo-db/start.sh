@@ -11,7 +11,7 @@ CONTAINER_EXISTS=$?
 
 if [[ ${CONTAINER_EXISTS} -eq 0 ]]
 then
-  echo "todo-db container is running already on ${MYSQL_IPADDR}" >/dev/stderr
+  echo "• todo-db container is running already on ${MYSQL_IPADDR}" >/dev/stderr
   exit -1
 fi
 
