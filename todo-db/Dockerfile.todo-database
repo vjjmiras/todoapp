@@ -1,5 +1,7 @@
 FROM registry.access.redhat.com/rhscl/mysql-57-rhel7:latest
 
+MAINTAINER Vicente J. Jimenez Miras <vjjmiras@redhat.com>
+
 # MySQL image for DO180
 #
 # Volumes:
