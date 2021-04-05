@@ -159,3 +159,17 @@ app.controller('alertMessagesController', function ($scope) {
 app.factory('itemService', function ($resource) {
     return $resource('http://TODO_API_SERVICE_HOST:TODO_API_SERVICE_PORT/todo/api/items/:id');
 });
+
+
+// Create a controller that handles host information
+app.controller('hostController', function ($scope, hostService) {
+        $scope.host = hostService.get();
+});
+
+//Service that provides host operations
+app.factory('hostService', function ($resource) {
+    return $resource('http://TODO_API_SERVICE_HOST:TODO_API_SERVICE_PORT/todo/api/host', null,
+                {
+                'get': { method:'GET' }
+                });
+});
