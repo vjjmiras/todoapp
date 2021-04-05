@@ -1,0 +1,14 @@
+FROM registry.access.redhat.com/rhscl/nodejs-8-rhel7:latest
+
+MAINTAINER Vicente J. Jimenez Miras <vjjmiras@redhat.com>
+
+ARG NPM_PROXY
+
+RUN mkdir /tmp/src
+
+COPY . /tmp/src
+
+RUN /usr/libexec/s2i/assemble
+
+CMD ["/usr/libexec/s2i/run"]
+
