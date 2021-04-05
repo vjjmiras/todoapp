@@ -1,0 +1,152 @@
+kind: List
+metadata: {}
+apiVersion: v1
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations: {}
+    labels:
+      app: todo-db
+      app.kubernetes.io/component: todo-db
+      app.kubernetes.io/instance: todo-db
+    name: mysql
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations:
+        openshift.io/imported-from: registry.access.redhat.com/rhscl/mysql-57-rhel7:latest
+      from:
+        kind: DockerImage
+        name: registry.access.redhat.com/rhscl/mysql-57-rhel7:latest
+      generation: null
+      importPolicy: {}
+      name: "latest"
+      referencePolicy:
+        type: ""
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations: {}
+    labels:
+      app: todo-db
+      app.kubernetes.io/component: todo-db
+      app.kubernetes.io/instance: todo-db
+    name: todo-db
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations: {}
+    labels:
+      app: todo-db
+      app.kubernetes.io/component: todo-db
+      app.kubernetes.io/instance: todo-db
+    name: todo-db
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: todo-db:latest
+    postCommit: {}
+    resources: {}
+    source:
+      contextDir: todo-db
+      git:
+        uri: https://github.com/vjjmiras/todoapp
+        ref: dev
+      type: Git
+    strategy:
+      dockerStrategy:
+        dockerfilePath: Dockerfile.todo-database
+        from:
+          kind: ImageStreamTag
+          name: mysql:latest
+      type: Docker
+    triggers:
+    - github:
+        secret: rA_G1f9Miu234wNekorv
+      type: GitHub
+    - generic:
+        secret: n0o0WziXv3gMnPf_-S00
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    name: todo-db
+    annotations: {}
+    labels:
+      app: todo-db
+      app.kubernetes.io/component: todo-db
+      app.kubernetes.io/instance: todo-db
+  spec:
+    revisionHistoryLimit: 10
+    selector:
+      deploymentconfig: todo-db
+    strategy:
+      type: Rolling
+      resources: {}
+      activeDeadlineSeconds: 21600
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+    replicas: 1
+    selector:
+      deploymentconfig: todo-db
+    template:
+      metadata:
+        annotations: {}
+        labels:
+          deploymentconfig: todo-db
+      spec:
+        containers:
+        - image: ' '
+          name: todo-db
+          resources: {}
+          env:
+          - name: MYSQL_ROOT_PASSWORD
+            value: r00tpa55
+          - name: MYSQL_USER
+            value: user1
+          - name: MYSQL_PASSWORD
+            value: mypa55
+          - name: MYSQL_DATABASE
+            value: items
+    test: false
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - todo-db
+        from:
+          kind: ImageStreamTag
+          name: todo-db:latest
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: todo-db
+    labels:
+      app: todo-db
+      app.kubernetes.io/component: todo-db
+      app.kubernetes.io/instance: todo-db
+  spec:
+    type: ClusterIP
+    ports:
+    - port: 3306
+      protocol: TCP
+      targetPort: 3306
+    selector:
+      deploymentconfig: todo-db
+    sessionAffinity: None

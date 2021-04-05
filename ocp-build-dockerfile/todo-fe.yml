@@ -1,0 +1,164 @@
+kind: List
+metadata: {}
+apiVersion: v1
+items:
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations: {}
+    labels:
+      app: todo-fe
+      app.kubernetes.io/component: todo-fe
+      app.kubernetes.io/instance: todo-fe
+    name: httpd
+  spec:
+    lookupPolicy:
+      local: false
+    tags:
+    - annotations: {}
+      from:
+        kind: DockerImage
+        name: registry.access.redhat.com/rhscl/httpd-24-rhel7:latest
+      generation: null
+      importPolicy: {}
+      name: "latest"
+      referencePolicy:
+        type: ""
+- apiVersion: image.openshift.io/v1
+  kind: ImageStream
+  metadata:
+    annotations: {}
+    labels:
+      app: todo-fe
+      app.kubernetes.io/component: todo-fe
+      app.kubernetes.io/instance: todo-fe
+    name: todo-fe
+  spec:
+    lookupPolicy:
+      local: false
+- apiVersion: build.openshift.io/v1
+  kind: BuildConfig
+  metadata:
+    annotations: {}
+    labels:
+      app: todo-fe
+      app.kubernetes.io/component: todo-fe
+      app.kubernetes.io/instance: todo-fe
+    name: todo-fe
+  spec:
+    nodeSelector: null
+    output:
+      to:
+        kind: ImageStreamTag
+        name: todo-fe:latest
+    postCommit: {}
+    resources: {}
+    source:
+      contextDir: todo-fe
+      git:
+        uri: https://github.com/vjjmiras/todoapp
+        ref: dev
+      type: Git
+    strategy:
+      dockerStrategy:
+        dockerfilePath: Dockerfile.s2i
+        from:
+          kind: ImageStreamTag
+          name: httpd:latest
+      type: Docker
+    triggers:
+    - github:
+        secret: rA_G1f9Miu234wNekorv
+      type: GitHub
+    - generic:
+        secret: n0o0WziXv3gMnPf_-S00
+      type: Generic
+    - type: ConfigChange
+    - imageChange: {}
+      type: ImageChange
+- apiVersion: apps.openshift.io/v1
+  kind: DeploymentConfig
+  metadata:
+    name: todo-fe
+    annotations: {}
+    labels:
+      app: todo-fe
+      app.kubernetes.io/component: todo-fe
+      app.kubernetes.io/instance: todo-fe
+  spec:
+    revisionHistoryLimit: 10
+    selector:
+      deploymentconfig: todo-fe
+    strategy:
+      type: Rolling
+      resources: {}
+      activeDeadlineSeconds: 21600
+      rollingParams:
+        intervalSeconds: 1
+        maxSurge: 25%
+        maxUnavailable: 25%
+        timeoutSeconds: 600
+        updatePeriodSeconds: 1
+    replicas: 1
+    selector:
+      deploymentconfig: todo-fe
+    template:
+      metadata:
+        annotations: {}
+        labels:
+          deploymentconfig: todo-fe
+      spec:
+        containers:
+        - image: ' '
+          name: todo-fe
+          resources: {}
+          env: 
+          - name: TODO_API_SERVICE_HOST
+            value: todo-api-vjjmiras-todoapp.apps.eu45.prod.nextcle.com
+          - name: TODO_API_SERVICE_PORT
+            value: "80"
+    test: false
+    triggers:
+    - type: ConfigChange
+    - type: ImageChange
+      imageChangeParams:
+        automatic: true
+        containerNames:
+        - todo-fe
+        from:
+          kind: ImageStreamTag
+          name: todo-fe:latest
+- apiVersion: v1
+  kind: Service
+  metadata:
+    name: todo-fe
+    labels:
+      app: todo-fe
+      app.kubernetes.io/component: todo-fe
+      app.kubernetes.io/instance: todo-fe
+  spec:
+    type: ClusterIP
+    ports:
+    - port: 8080
+      protocol: TCP
+      targetPort: 8080
+    selector:
+      deploymentconfig: todo-fe
+    sessionAffinity: None
+- apiVersion: route.openshift.io/v1
+  kind: Route
+  metadata:
+    name: app 
+    annotations: {}
+    labels:
+      app: todo-fe
+      app.kubernetes.io/component: todo-fe
+      app.kubernetes.io/instance: todo-fe
+  spec:
+    port:
+      targetPort: 8080
+    to:
+      kind: Service
+      name: todo-fe
+      weight: 100
+    wildcardPolicy: None
